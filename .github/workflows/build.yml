@@ -61,7 +61,7 @@ jobs:
       - name: Build artifacts
         run: flutter build windows --release
       - name: Archive Release
-        uses: thedoctor0/zip-release@v0.6.1
+        uses: TheDoctor0/zip-release@0.6.1
         with:
           type: 'zip'
           filename: VideoProcessTool-${{github.ref_name}}-windows.zip
@@ -91,7 +91,7 @@ jobs:
       - name: Build artifacts
         run: flutter build macos --release
       - name: Archive Release
-        uses: thedoctor0/zip-release@v0.6.1
+        uses: TheDoctor0/zip-release@0.6.1
         with:
           type: 'zip'
           filename: VideoProcessTool-${{github.ref_name}}-macos.zip
