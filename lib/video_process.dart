@@ -1,12 +1,14 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart' as p;
 
 Future<void> processVideo(String origFilepath, String origFile,
     String outputPath, Function updateProgress) async {
   final origFilename = origFile.split('.')[0];
+  final current = p.current;
   final resultFrameCount = await Process.run(
-    'ffprobe',
+    Platform.isWindows ? '$current/ffprobe.exe' : 'ffprobe',
     [
       '-v',
       'error',
@@ -21,9 +23,12 @@ Future<void> processVideo(String origFilepath, String origFile,
     workingDirectory: '/Users/james/Downloads',
   );
   final frameCount = resultFrameCount.stdout as String;
+  if (kDebugMode) {
+    print(frameCount);
+  }
 //scrape video start timecode
   final resultTime = await Process.run(
-    'ffprobe',
+    Platform.isWindows ? '$current/ffprobe.exe' : 'ffprobe',
     [
       '-v',
       'error',
@@ -41,9 +46,12 @@ Future<void> processVideo(String origFilepath, String origFile,
   final timecodeSplit = timecode.split(':');
   final timecodeSplitMs = timecodeSplit.removeLast().trim().padRight(3, '0');
   final timecodeJoin = timecodeSplit.join(':') + '.' + timecodeSplitMs;
+  if (kDebugMode) {
+    print(timecodeJoin);
+  }
 //scrape video created datetime and remove time
   final resultCreation = await Process.run(
-    'ffprobe',
+    Platform.isWindows ? '$current/ffprobe.exe' : 'ffprobe',
     [
       '-v',
       'error',
@@ -59,6 +67,9 @@ Future<void> processVideo(String origFilepath, String origFile,
   );
   final creationTime = resultCreation.stdout as String;
   final videoDate = creationTime.split('T');
+  if (kDebugMode) {
+    print(videoDate);
+  }
 //piece together iso datetime string and parse
   final videoStartString = videoDate[0] + 'T' + timecodeJoin + 'Z';
   final videoStartDateTime = DateTime.parse(videoStartString);
@@ -66,7 +77,7 @@ Future<void> processVideo(String origFilepath, String origFile,
       Duration.millisecondsPerSecond;
 //scrape duration
   final resultDuration = await Process.run(
-    'ffprobe',
+    Platform.isWindows ? '$current/ffprobe.exe' : 'ffprobe',
     [
       '-v',
       'error',
@@ -95,7 +106,7 @@ Future<void> processVideo(String origFilepath, String origFile,
     print('starting video process');
   }
   final process = await Process.start(
-    'ffmpeg',
+    Platform.isWindows ? '$current/ffprobe.exe' : 'ffmpeg',
     [
       '-progress',
       '-',
