@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
@@ -8,7 +9,7 @@ Future<void> processVideo(String origFilepath, String origFile,
   final origFilename = origFile.split('.')[0];
   final current = p.current;
   final resultFrameCount = await Process.run(
-    Platform.isWindows ? '$current/ffprobe.exe' : 'ffprobe',
+    Platform.isWindows ? '$current\\ffprobe.exe' : 'ffprobe',
     [
       '-v',
       'error',
@@ -20,7 +21,7 @@ Future<void> processVideo(String origFilepath, String origFile,
       'default=noprint_wrappers=1:nokey=1',
       origFile,
     ],
-    workingDirectory: '/Users/james/Downloads',
+    workingDirectory: origFilepath,
   );
   final frameCount = resultFrameCount.stdout as String;
   if (kDebugMode) {
@@ -28,7 +29,7 @@ Future<void> processVideo(String origFilepath, String origFile,
   }
 //scrape video start timecode
   final resultTime = await Process.run(
-    Platform.isWindows ? '$current/ffprobe.exe' : 'ffprobe',
+    Platform.isWindows ? '$current\\ffprobe.exe' : 'ffprobe',
     [
       '-v',
       'error',
@@ -51,7 +52,7 @@ Future<void> processVideo(String origFilepath, String origFile,
   }
 //scrape video created datetime and remove time
   final resultCreation = await Process.run(
-    Platform.isWindows ? '$current/ffprobe.exe' : 'ffprobe',
+    Platform.isWindows ? '$current\\ffprobe.exe' : 'ffprobe',
     [
       '-v',
       'error',
@@ -77,7 +78,7 @@ Future<void> processVideo(String origFilepath, String origFile,
       Duration.millisecondsPerSecond;
 //scrape duration
   final resultDuration = await Process.run(
-    Platform.isWindows ? '$current/ffprobe.exe' : 'ffprobe',
+    Platform.isWindows ? '$current\\ffprobe.exe' : 'ffprobe',
     [
       '-v',
       'error',
@@ -103,10 +104,12 @@ Future<void> processVideo(String origFilepath, String origFile,
   );
   final videoEndDateTime = videoStartDateTime.add(duration);
   if (kDebugMode) {
+    print(duration);
     print('starting video process');
   }
+  final pathCharacter = Platform.isWindows ? '\\' : '/';
   final process = await Process.start(
-    Platform.isWindows ? '$current/ffprobe.exe' : 'ffmpeg',
+    Platform.isWindows ? '$current\\ffmpeg.exe' : 'ffmpeg',
     [
       '-progress',
       '-',
@@ -120,22 +123,33 @@ Future<void> processVideo(String origFilepath, String origFile,
       'ultrafast',
       '-f',
       'mp4',
-      '$outputPath/${DateFormat('y-MM-dd HH_mm_ss').format(videoStartDateTime)} to ${DateFormat('HH_mm_ss').format(videoEndDateTime)} - $origFilename.mp4'
+      '$outputPath$pathCharacter${DateFormat('y-MM-dd HH_mm_ss').format(videoStartDateTime)} to ${DateFormat('HH_mm_ss').format(videoEndDateTime)} - $origFilename.mp4'
     ],
     workingDirectory: origFilepath,
+     
   );
   if (kDebugMode) {
     print('after start');
+    print(process.pid);
   }
-  await process.stdout.forEach((out) => updateProgress(
+   
+     process.stdout.transform(utf8.decoder).forEach((out) => updateProgress(
       frameCount,
-      String.fromCharCodes(out)
-          .split('\n')
+      out.split('\n')
           .firstWhere((element) => element.contains('frame'))
           .split('=')[1]
           .trim()));
+    // process.stdout.transform(utf8.decoder).forEach((out) => updateProgress(
+    //   frameCount,
+    //   out.split('\n')
+    //       .firstWhere((element) => element.contains('frame'))
+    //       .split('=')[1]
+    //       .trim()));
   if (kDebugMode) {
-    await process.stderr.forEach((err) => print(String.fromCharCodes(err)));
+     await process.stderr.transform(utf8.decoder).forEach((err) => print(err));
   }
-  process.kill();
+  var exitCode = await process.exitCode;
+  if (exitCode != 0){
+    process.kill();
+  }
 }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cross_file/cross_file.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -84,6 +86,7 @@ class _MainPageState extends State<MainPage> {
       });
       await _popupAlert('Complete', 'Complete: Tool will now close');
       await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+      exit(0);
     }
   }
 
@@ -96,9 +99,9 @@ class _MainPageState extends State<MainPage> {
     if (kDebugMode) {
       print('$_isRunning - $_currentFileName - $_fileProgress');
     }
-    var fileSplit = file.path.split('/');
+    var fileSplit = file.path.split(RegExp(r'\\|\/'));
     fileSplit.removeLast();
-    final workingDirectory = fileSplit.join('/');
+    final workingDirectory = Platform.isWindows ? fileSplit.join('\\') : fileSplit.join('/');
     await processVideo(
         workingDirectory, file.name, outputDirectory!, updateProgress);
   }
