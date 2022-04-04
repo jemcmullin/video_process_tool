@@ -200,6 +200,7 @@ class _MainPageState extends State<MainPage> {
             //const SizedBox(height: 5),
             Expanded(
               child: ListView.separated(
+                shrinkWrap: true,
                 itemCount: files.length,
                 separatorBuilder: (context, index) => const Divider(
                   height: 5,
