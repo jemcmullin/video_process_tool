@@ -22,7 +22,6 @@ Future<void> processVideo(String origFilepath, String fullFilePath, String origF
       'default=noprint_wrappers=1:nokey=1',
       fullFilePath,
     ],
-    //workingDirectory: origFilepath,
   );
   final frameCount = resultFrameCount.stdout as String;
   if (kDebugMode) {
@@ -42,7 +41,6 @@ Future<void> processVideo(String origFilepath, String fullFilePath, String origF
       'default=noprint_wrappers=1:nokey=1',
       fullFilePath,
     ],
-    //workingDirectory: origFilepath,
   );
   final timecode = resultTime.stdout as String;
   final timecodeSplit = timecode.split(':');
@@ -65,7 +63,6 @@ Future<void> processVideo(String origFilepath, String fullFilePath, String origF
       'default=noprint_wrappers=1:nokey=1',
       fullFilePath,
     ],
-    //workingDirectory: origFilepath,
   );
   final creationTime = resultCreation.stdout as String;
   final videoDate = creationTime.split('T');
@@ -92,7 +89,6 @@ Future<void> processVideo(String origFilepath, String fullFilePath, String origF
       'default=noprint_wrappers=1:nokey=1',
       fullFilePath,
     ],
-    //workingDirectory: origFilepath,
   );
   final durationString = resultDuration.stdout as String;
   final durationStringFormated = durationString.trim().padLeft(15, '0');
@@ -126,10 +122,6 @@ Future<void> processVideo(String origFilepath, String fullFilePath, String origF
       'mp4',
       '$outputPath$pathCharacter${DateFormat('y-MM-dd HH_mm_ss').format(videoStartDateTime)} to ${DateFormat('HH_mm_ss').format(videoEndDateTime)} - $origFilename.mp4'
     ],
-
-    //includeParentEnvironment: false,
-    //mode: ProcessStartMode.detachedWithStdio
-    //workingDirectory: origFilepath,
   );
   if (kDebugMode) {
     print('after start');
@@ -142,12 +134,6 @@ Future<void> processVideo(String origFilepath, String fullFilePath, String origF
           .firstWhere((element) => element.contains('frame'))
           .split('=')[1]
           .trim()));
-    // process.stdout.transform(utf8.decoder).forEach((out) => updateProgress(
-    //   frameCount,
-    //   out.split('\n')
-    //       .firstWhere((element) => element.contains('frame'))
-    //       .split('=')[1]
-    //       .trim()));
   
       process.stderr.transform(utf8.decoder).forEach((err) => print(err));
   
