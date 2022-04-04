@@ -44,7 +44,7 @@ class _MainPageState extends State<MainPage> {
   Duration? _timeRemaining;
   String? _currentFileName;
 
-  Future<void> _popupAlert(String title, String message) async {
+  Future<void> popupAlert(String title, String message) async {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -70,7 +70,7 @@ class _MainPageState extends State<MainPage> {
 
   Future<void> _runProcess() async {
     if (outputDirectory == null) {
-      await _popupAlert('No Output Folder', 'Please select an output folder');
+      await popupAlert('No Output Folder', 'Please select an output folder');
       return;
     } else if (_isRunning == true) {
       return;
@@ -84,7 +84,7 @@ class _MainPageState extends State<MainPage> {
       setState(() {
         _isRunning = false;
       });
-      await _popupAlert('Complete', 'Complete: Tool will now close');
+      await popupAlert('Complete', 'Complete: Tool will now close');
       await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
       exit(0);
     }
@@ -103,7 +103,7 @@ class _MainPageState extends State<MainPage> {
     fileSplit.removeLast();
     final workingDirectory = Platform.isWindows ? fileSplit.join('\\') : fileSplit.join('/');
     await processVideo(
-        workingDirectory, file.name, outputDirectory!, updateProgress);
+        workingDirectory, file.path, file.name, outputDirectory!, updateProgress, popupAlert);
   }
 
   void updateProgress(String totalFrames, String completedFrames) {

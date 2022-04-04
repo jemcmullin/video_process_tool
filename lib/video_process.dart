@@ -4,10 +4,11 @@ import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 
-Future<void> processVideo(String origFilepath, String origFile,
-    String outputPath, Function updateProgress) async {
+Future<void> processVideo(String origFilepath, String fullFilePath, String origFile,
+    String outputPath, Function updateProgress, Function popupA) async {
   final origFilename = origFile.split('.')[0];
   final current = p.current;
+  //await popupA('Debug', current);
   final resultFrameCount = await Process.run(
     Platform.isWindows ? '$current\\ffprobe.exe' : 'ffprobe',
     [
@@ -19,9 +20,9 @@ Future<void> processVideo(String origFilepath, String origFile,
       'stream=nb_frames',
       '-of',
       'default=noprint_wrappers=1:nokey=1',
-      origFile,
+      fullFilePath,
     ],
-    workingDirectory: origFilepath,
+    //workingDirectory: origFilepath,
   );
   final frameCount = resultFrameCount.stdout as String;
   if (kDebugMode) {
@@ -39,9 +40,9 @@ Future<void> processVideo(String origFilepath, String origFile,
       'stream_tags=timecode',
       '-of',
       'default=noprint_wrappers=1:nokey=1',
-      origFile,
+      fullFilePath,
     ],
-    workingDirectory: origFilepath,
+    //workingDirectory: origFilepath,
   );
   final timecode = resultTime.stdout as String;
   final timecodeSplit = timecode.split(':');
@@ -62,9 +63,9 @@ Future<void> processVideo(String origFilepath, String origFile,
       'stream_tags=creation_time',
       '-of',
       'default=noprint_wrappers=1:nokey=1',
-      origFile,
+      fullFilePath,
     ],
-    workingDirectory: origFilepath,
+    //workingDirectory: origFilepath,
   );
   final creationTime = resultCreation.stdout as String;
   final videoDate = creationTime.split('T');
@@ -89,9 +90,9 @@ Future<void> processVideo(String origFilepath, String origFile,
       '-sexagesimal',
       '-of',
       'default=noprint_wrappers=1:nokey=1',
-      origFile,
+      fullFilePath,
     ],
-    workingDirectory: origFilepath,
+    //workingDirectory: origFilepath,
   );
   final durationString = resultDuration.stdout as String;
   final durationStringFormated = durationString.trim().padLeft(15, '0');
@@ -116,7 +117,7 @@ Future<void> processVideo(String origFilepath, String origFile,
       '-nostats',
       '-y',
       '-i',
-      origFile,
+      fullFilePath,
       '-vf',
       'drawtext=\'box=1:boxcolor=0x000000@0.4:boxborderw=5:fontcolor=White:fontsize=56:x=(w-text_w-15):y=(h-text_h-15):text=%{pts\\:gmtime\\:$videoStartEpoch}\'',
       '-preset',
@@ -125,8 +126,10 @@ Future<void> processVideo(String origFilepath, String origFile,
       'mp4',
       '$outputPath$pathCharacter${DateFormat('y-MM-dd HH_mm_ss').format(videoStartDateTime)} to ${DateFormat('HH_mm_ss').format(videoEndDateTime)} - $origFilename.mp4'
     ],
-    workingDirectory: origFilepath,
-     
+
+    //includeParentEnvironment: false,
+    //mode: ProcessStartMode.detachedWithStdio
+    //workingDirectory: origFilepath,
   );
   if (kDebugMode) {
     print('after start');
@@ -145,9 +148,9 @@ Future<void> processVideo(String origFilepath, String origFile,
     //       .firstWhere((element) => element.contains('frame'))
     //       .split('=')[1]
     //       .trim()));
-  if (kDebugMode) {
-     await process.stderr.transform(utf8.decoder).forEach((err) => print(err));
-  }
+  
+      process.stderr.transform(utf8.decoder).forEach((err) => print(err));
+  
   var exitCode = await process.exitCode;
   if (exitCode != 0){
     process.kill();
